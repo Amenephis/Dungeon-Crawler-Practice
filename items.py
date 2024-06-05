@@ -3,7 +3,7 @@ import pygame
 class Item(pygame.sprite.Sprite):
     def __init__(self, x, y, item_type, animation_list, dummy_coin = False):
         pygame.sprite.Sprite.__init__(self)
-        self.item_type = item_type #0: coin, 1: health potion
+        self.item_type = item_type #0: coin, 1: health potion, 2: sword
         self.animation_list = animation_list
         self.frame_index = 0
         self.update_time = pygame.time.get_ticks()
@@ -25,11 +25,16 @@ class Item(pygame.sprite.Sprite):
             if self.item_type == 0:
                 player.score += 1
                 coin_fx.play()
+            #potion collected
             elif self.item_type == 1:
                 player.health += 10
                 heal_fx.play()
                 if player.health > 100:
                     player.health = 100
+            #sword collected
+            elif self.item_type == 2:
+                player.inventory.append(2)
+                player.damage_bonus += 1
             self.kill()
         
         #handle animation

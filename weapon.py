@@ -54,7 +54,7 @@ class Arrow(pygame.sprite.Sprite):
         self.dy = -(math.sin(math.radians(self.angle)) * constants.ARROW_SPEED)
         
         
-    def update(self, screen_scroll, obstacle_tiles, enemy_list):
+    def update(self, screen_scroll, obstacle_tiles, enemy_list, player):
         #reset variables
         damage = 0
         damage_pos = None
@@ -75,7 +75,7 @@ class Arrow(pygame.sprite.Sprite):
         #check collision between arrow and enemies
         for enemy in enemy_list:
             if enemy.rect.colliderect(self.rect) and enemy.alive:
-                damage = 10 + random.randint(-5, 5)
+                damage = 10 + random.randint(-5, 5) + player.damage_bonus
                 damage_pos = enemy.rect
                 enemy.health -= damage
                 enemy.hit = True

@@ -22,6 +22,8 @@ class Character():
     self.last_hit = pygame.time.get_ticks()
     self.last_attack = pygame.time.get_ticks()
     self.stunned = False
+    self.inventory = []
+    self.damage_bonus = 0
 
     self.image = self.animation_list[self.action][self.frame_index]
     self.rect = pygame.Rect(0, 0, (constants.TILE_SIZE * size) - 10, (constants.TILE_SIZE * size) - 10)
@@ -159,16 +161,19 @@ class Character():
     return fireball, player_hit_sfx
   
   def enemy_death(self, enemy_list, item_images, item_group):
-    chance = rng(1,2)
+    chance = 2# rng(1,2)
     item_type = 0
     if chance == 2:
-      item_type = rng(1,2)
+      item_type = 3 #rng(1,3)
       if item_type == 1:
-        potion = Item(self.rect.x + (constants.TILE_SIZE // 2), self.rect.y + (constants.TILE_SIZE // 2), 1, [item_images[1]])
-        item_group.add(potion)
-      elif item_type == 2:
         coin = Item(self.rect.x + (constants.TILE_SIZE // 2), self.rect.y + (constants.TILE_SIZE // 2), 0, item_images[0])
         item_group.add(coin)
+      elif item_type == 2:
+        potion = Item(self.rect.x + (constants.TILE_SIZE // 2), self.rect.y + (constants.TILE_SIZE // 2), 1, [item_images[1]])
+        item_group.add(potion)
+      elif item_type == 3:
+        sword = Item(self.rect.x + (constants.TILE_SIZE // 2), self.rect.y + (constants.TILE_SIZE // 2), 2, [item_images[2]])
+        item_group.add(sword)
     enemy_list.remove(self)
     return enemy_list, item_group
 

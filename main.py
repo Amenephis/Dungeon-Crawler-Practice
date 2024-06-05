@@ -18,274 +18,284 @@ pygame.display.set_caption("Dungeon Crawler")
 #create clock for maintaining frame rate
 clock = pygame.time.Clock()
 
+async def main():
 #define game variables
-level = 1
-start_game = False
-pause_game = False
-inventory_screen = False
-start_intro = False
-screen_scroll = [0, 0]
-p_d = True
-
-#define player movement variables
-moving_left = False
-moving_right = False
-moving_up = False
-moving_down = False
-
-#define font
-font = pygame.font.Font("assets/fonts/AtariClassic.ttf", 20)
-
-#helper function to scale image
-def scale_img(image, scale):
-  w = image.get_width()
-  h = image.get_height()
-  return pygame.transform.scale(image, (w * scale, h * scale))
-
-#load music and sounds
-pygame.mixer.music.load("assets/audio/music.wav")
-pygame.mixer.music.set_volume(0.3)
-pygame.mixer.music.play(-1, 0.0, 5000)
-shot_fx = pygame.mixer.Sound("assets/audio/arrow_shot.wav")
-shot_fx.set_volume(0.5)
-hit_fx = pygame.mixer.Sound("assets/audio/arrow_hit.wav")
-hit_fx.set_volume(0.5)
-coin_fx = pygame.mixer.Sound("assets/audio/coin.wav")
-coin_fx.set_volume(0.5)
-heal_fx = pygame.mixer.Sound("assets/audio/heal.wav")
-heal_fx.set_volume(0.5)
-death_fx = pygame.mixer.Sound("assets/audio/scream1.wav")
-death_fx.set_volume(0.5)
-player_hurt_fx = pygame.mixer.Sound("assets/audio/hurt.wav")
-player_hurt_fx.set_volume(0.3)
-player_death_fx = pygame.mixer.Sound("assets/audio/player_death.wav")
-player_death_fx.set_volume(0.3)
-
-#load button images
-start_img = scale_img(pygame.image.load("assets/images/buttons/button_start.png").convert_alpha(), constants.BUTTON_SCALE)
-exit_img = scale_img(pygame.image.load("assets/images/buttons/button_exit.png").convert_alpha(), constants.BUTTON_SCALE)
-restart_img = scale_img(pygame.image.load("assets/images/buttons/button_restart.png").convert_alpha(), constants.BUTTON_SCALE)
-resume_img = scale_img(pygame.image.load("assets/images/buttons/button_resume.png").convert_alpha(), constants.BUTTON_SCALE)
-inventory_resume_button = scale_img(pygame.image.load("assets/images/buttons/button_resume.png").convert_alpha(), constants.INVENTORY_BUTTON_SCALE)
-
-#load sub-menu screens
-inventory_screen_fill = scale_img(pygame.image.load("assets/images/screens/inventory_screen.png").convert_alpha(), constants.MENU_SCALE)
-
-#load heart images
-heart_empty = scale_img(pygame.image.load("assets/images/items/heart_empty.png").convert_alpha(), constants.ITEM_SCALE)
-heart_half = scale_img(pygame.image.load("assets/images/items/heart_half.png").convert_alpha(), constants.ITEM_SCALE)
-heart_full = scale_img(pygame.image.load("assets/images/items/heart_full.png").convert_alpha(), constants.ITEM_SCALE)
-
-#load coin images
-coin_images = []
-for x in range(4):
-  img = scale_img(pygame.image.load(f"assets/images/items/coin_f{x}.png").convert_alpha(), constants.ITEM_SCALE)
-  coin_images.append(img)
-
-#load potion image
-red_potion = scale_img(pygame.image.load("assets/images/items/potion_red.png").convert_alpha(), constants.POTION_SCALE)
-
-item_images = []
-item_images.append(coin_images)
-item_images.append(red_potion)
-
-#load weapon images
-bow_image = scale_img(pygame.image.load("assets/images/weapons/bow.png").convert_alpha(), constants.WEAPON_SCALE)
-arrow_image = scale_img(pygame.image.load("assets/images/weapons/arrow.png").convert_alpha(), constants.WEAPON_SCALE)
-fireball_image = scale_img(pygame.image.load("assets/images/weapons/fireball.png").convert_alpha(), constants.FIREBALL_SCALE)
-
-#load tilemap images
-tile_list = []
-for x in range(constants.TILE_TYPES):
-  tile_image = pygame.image.load(f"assets/images/tiles/{x}.png").convert_alpha()
-  tile_image = pygame.transform.scale(tile_image, (constants.TILE_SIZE, constants.TILE_SIZE))
-  tile_list.append(tile_image)
-
-#load decals
-def splatter_gen():
-  splatter_num = rng(1,4)
-  splatter_image = scale_img(pygame.image.load(f"assets/images/tiles/blood{splatter_num}.png").convert_alpha(), constants.BLOOD_SCALE)
-  return splatter_image
-
-#load character images
-mob_animations = []
-mob_types = ["elf", "imp", "skeleton", "goblin", "muddy", "tiny_zombie", "big_demon"]
-
-animation_types = ["idle", "run"]
-for mob in mob_types:
-  #load images
-  animation_list = []
-  for animation in animation_types:
-    #reset temporary list of images
-    temp_list = []
-    for i in range(4):
-      img = pygame.image.load(f"assets/images/characters/{mob}/{animation}/{i}.png").convert_alpha()
-      img = scale_img(img, constants.SCALE)
-      temp_list.append(img)
-    animation_list.append(temp_list)
-  mob_animations.append(animation_list)
+  level = 1
+  start_game = False
+  pause_game = False
+  inventory_screen = False
+  start_intro = False
+  screen_scroll = [0, 0]
+  p_d = True
 
 
-#function for outputting text onto the screen
-def draw_text(text, font, text_col, x, y):
-  img = font.render(text, True, text_col)
-  screen.blit(img, (x, y))
+  #define player movement variables
+  moving_left = False
+  moving_right = False
+  moving_up = False
+  moving_down = False
 
-#function for displaying game info
-def draw_info():
-  pygame.draw.rect(screen, constants.PANEL, (0, 0, constants.SCREEN_WIDTH, 50))
-  pygame.draw.line(screen, constants.WHITE, (0, 50), (constants.SCREEN_WIDTH, 50))
-  #draw lives
-  half_heart_drawn = False
-  for i in range(5):
-    if player.health >= ((i + 1) * 20):
-      screen.blit(heart_full, (10 + i * 50, 0))
-    elif (player.health % 20 > 0) and half_heart_drawn == False:
-      screen.blit(heart_half, (10 + i * 50, 0))
-      half_heart_drawn = True
+  #define font
+  font = pygame.font.Font("assets/fonts/AtariClassic.ttf", 20)
+
+  #helper function to scale image
+  def scale_img(image, scale):
+    w = image.get_width()
+    h = image.get_height()
+    return pygame.transform.scale(image, (w * scale, h * scale))
+
+  #load music and sounds
+  pygame.mixer.music.load("assets/audio/music.ogg")
+  pygame.mixer.music.set_volume(0.3)
+  pygame.mixer.music.play(-1, 0.0, 5000)
+  shot_fx = pygame.mixer.Sound("assets/audio/arrow_shot.ogg")
+  shot_fx.set_volume(0.5)
+  hit_fx = pygame.mixer.Sound("assets/audio/arrow_hit.ogg")
+  hit_fx.set_volume(0.5)
+  coin_fx = pygame.mixer.Sound("assets/audio/coin.ogg")
+  coin_fx.set_volume(0.5)
+  heal_fx = pygame.mixer.Sound("assets/audio/heal.ogg")
+  heal_fx.set_volume(0.5)
+  death_fx = pygame.mixer.Sound("assets/audio/scream1.ogg")
+  death_fx.set_volume(0.5)
+  player_hurt_fx = pygame.mixer.Sound("assets/audio/hurt.ogg")
+  player_hurt_fx.set_volume(0.3)
+  player_death_fx = pygame.mixer.Sound("assets/audio/player_death.ogg")
+  player_death_fx.set_volume(0.3)
+
+  #load button images
+  start_img = scale_img(pygame.image.load("assets/images/buttons/button_start.png").convert_alpha(), constants.BUTTON_SCALE)
+  exit_img = scale_img(pygame.image.load("assets/images/buttons/button_exit.png").convert_alpha(), constants.BUTTON_SCALE)
+  restart_img = scale_img(pygame.image.load("assets/images/buttons/button_restart.png").convert_alpha(), constants.BUTTON_SCALE)
+  resume_img = scale_img(pygame.image.load("assets/images/buttons/button_resume.png").convert_alpha(), constants.BUTTON_SCALE)
+  inventory_resume_button = scale_img(pygame.image.load("assets/images/buttons/button_resume.png").convert_alpha(), constants.INVENTORY_BUTTON_SCALE)
+
+  #load sub-menu screens
+  inventory_screen_fill = scale_img(pygame.image.load("assets/images/screens/inventory_screen.png").convert_alpha(), constants.MENU_SCALE)
+
+  #load heart images
+  heart_empty = scale_img(pygame.image.load("assets/images/items/heart_empty.png").convert_alpha(), constants.ITEM_SCALE)
+  heart_half = scale_img(pygame.image.load("assets/images/items/heart_half.png").convert_alpha(), constants.ITEM_SCALE)
+  heart_full = scale_img(pygame.image.load("assets/images/items/heart_full.png").convert_alpha(), constants.ITEM_SCALE)
+
+  #load coin images
+  coin_images = []
+  for x in range(4):
+    img = scale_img(pygame.image.load(f"assets/images/items/coin_f{x}.png").convert_alpha(), constants.ITEM_SCALE)
+    coin_images.append(img)
+
+  #load potion image
+  red_potion = scale_img(pygame.image.load("assets/images/items/potion_red.png").convert_alpha(), constants.POTION_SCALE)
+
+  #load item drop images
+  sword_drop_image = scale_img(pygame.image.load("assets/images/items/sword.png").convert_alpha(), constants.DROP_SCALE)
+  sword_drop_inventory = scale_img(pygame.image.load("assets/images/items/sword.png").convert_alpha(), constants.INVENTORY_SCREEN_ITEM_SCALE)
+
+  item_images = []
+  item_images.append(coin_images)
+  item_images.append(red_potion)
+  item_images.append(sword_drop_image)
+
+  #load weapon images
+  bow_image = scale_img(pygame.image.load("assets/images/weapons/bow.png").convert_alpha(), constants.WEAPON_SCALE)
+  arrow_image = scale_img(pygame.image.load("assets/images/weapons/arrow.png").convert_alpha(), constants.WEAPON_SCALE)
+  fireball_image = scale_img(pygame.image.load("assets/images/weapons/fireball.png").convert_alpha(), constants.FIREBALL_SCALE)
+
+  #load tilemap images
+  tile_list = []
+  for x in range(constants.TILE_TYPES):
+    tile_image = pygame.image.load(f"assets/images/tiles/{x}.png").convert_alpha()
+    tile_image = pygame.transform.scale(tile_image, (constants.TILE_SIZE, constants.TILE_SIZE))
+    tile_list.append(tile_image)
+
+  #load decals
+  def splatter_gen():
+    splatter_num = rng(1,4)
+    if enemy.boss == True:
+      splatter_image = scale_img(pygame.image.load(f"assets/images/tiles/blood{splatter_num}.png").convert_alpha(), constants.BLOOD_SCALE * 2)
     else:
-      screen.blit(heart_empty, (10 + i * 50, 0))
+      splatter_image = scale_img(pygame.image.load(f"assets/images/tiles/blood{splatter_num}.png").convert_alpha(), constants.BLOOD_SCALE)
+    return splatter_image
 
-  #level
-  draw_text("LEVEL: " + str(level), font, constants.WHITE, constants.SCREEN_WIDTH / 2, 15)
-  #show score
-  draw_text(f"X{player.score}", font, constants.WHITE, constants.SCREEN_WIDTH - 100, 15)
+  #load character images
+  mob_animations = []
+  mob_types = ["elf", "imp", "skeleton", "goblin", "muddy", "tiny_zombie", "big_demon"]
 
-#function to reset level
-def reset_level():
-  damage_text_group.empty()
-  arrow_group.empty()
-  item_group.empty()
-  fireball_group.empty()
-  splatter_group.empty()
+  animation_types = ["idle", "run"]
+  for mob in mob_types:
+    #load images
+    animation_list = []
+    for animation in animation_types:
+      #reset temporary list of images
+      temp_list = []
+      for i in range(4):
+        img = pygame.image.load(f"assets/images/characters/{mob}/{animation}/{i}.png").convert_alpha()
+        img = scale_img(img, constants.SCALE)
+        temp_list.append(img)
+      animation_list.append(temp_list)
+    mob_animations.append(animation_list)
+
+
+  #function for outputting text onto the screen
+  def draw_text(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
+
+  #function for displaying game info
+  def draw_info():
+    pygame.draw.rect(screen, constants.PANEL, (0, 0, constants.SCREEN_WIDTH, 50))
+    pygame.draw.line(screen, constants.WHITE, (0, 50), (constants.SCREEN_WIDTH, 50))
+    #draw lives
+    half_heart_drawn = False
+    for i in range(5):
+      if player.health >= ((i + 1) * 20):
+        screen.blit(heart_full, (10 + i * 50, 0))
+      elif (player.health % 20 > 0) and half_heart_drawn == False:
+        screen.blit(heart_half, (10 + i * 50, 0))
+        half_heart_drawn = True
+      else:
+        screen.blit(heart_empty, (10 + i * 50, 0))
+
+    #level
+    draw_text("LEVEL: " + str(level), font, constants.WHITE, constants.SCREEN_WIDTH / 2, 15)
+    #show score
+    draw_text(f"X{player.score}", font, constants.WHITE, constants.SCREEN_WIDTH - 100, 15)
+
+  #function to reset level
+  def reset_level():
+    damage_text_group.empty()
+    arrow_group.empty()
+    item_group.empty()
+    fireball_group.empty()
+    splatter_group.empty()
+
+    #create empty tile list
+    data = []
+    for row in range(constants.ROWS):
+      r = [-1] * constants.COLS
+      data.append(r)
+
+    return data
+
+  #function to resume the game from a menu screen
+  def resume():
+    inventory_screen = False
+    pause_game = False
+    return inventory_screen, pause_game
+
+  #damage text class
+  class DamageText(pygame.sprite.Sprite):
+    def __init__(self, x, y, damage, color):
+      pygame.sprite.Sprite.__init__(self)
+      self.image = font.render(damage, True, color)
+      self.rect = self.image.get_rect()
+      self.rect.center = (x, y)
+      self.counter = 0
+
+    def update(self):
+      #reposition based on screen scroll
+      self.rect.x += screen_scroll[0]
+      self.rect.y += screen_scroll[1]
+
+      #move damage text up
+      self.rect.y -= 1
+      #delete the counter after a few seconds
+      self.counter += 1
+      if self.counter > 30:
+        self.kill()
+
+  #class for handling screen fade
+  class ScreenFade():
+    def __init__(self, direction, colour, speed):
+      self.direction = direction
+      self.colour = colour
+      self.speed = speed
+      self.fade_counter = 0
+
+    def fade(self):
+      fade_complete = False
+      self.fade_counter += self.speed
+      if self.direction == 1:#whole screen fade
+        pygame.draw.rect(screen, self.colour, (0 - self.fade_counter, 0, constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT))
+        pygame.draw.rect(screen, self.colour, (constants.SCREEN_WIDTH // 2 + self.fade_counter, 0, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
+        pygame.draw.rect(screen, self.colour, (0, 0 - self.fade_counter, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT // 2))
+        pygame.draw.rect(screen, self.colour, (0, constants.SCREEN_HEIGHT // 2 + self.fade_counter, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
+      elif self.direction == 2:#vertical screen fade down
+        pygame.draw.rect(screen, self.colour, (0, 0, constants.SCREEN_WIDTH, 0 + self.fade_counter))
+
+      if self.fade_counter >= constants.SCREEN_WIDTH:
+        fade_complete = True
+
+      return fade_complete
+
+  #blood splatter
+  class Splatter(pygame.sprite.Sprite):
+    def __init__(self, image, x, y):
+      pygame.sprite.Sprite.__init__(self)
+      self.image = image
+      self.rect = self.image.get_rect()
+      self.rect.center = (x, y)
+      
+    def update(self, screen_scroll):
+      #reposition based on screen scroll
+      self.rect.x += screen_scroll[0]
+      self.rect.y += screen_scroll[1]
 
   #create empty tile list
-  data = []
+  world_data = []
   for row in range(constants.ROWS):
     r = [-1] * constants.COLS
-    data.append(r)
+    world_data.append(r)
+  #load in level data and create world
+  with open(f"levels/level{level}_data.csv", newline="") as csvfile:
+    reader = csv.reader(csvfile, delimiter = ",")
+    for x, row in enumerate(reader):
+      for y, tile in enumerate(row):
+        world_data[x][y] = int(tile)
 
-  return data
+  world = World()
+  world.process_data(world_data, tile_list, item_images, mob_animations)
 
-#function to resume the game from a menu screen
-def resume():
-  inventory_screen = False
-  pause_game = False
-  return inventory_screen, pause_game
+  #create player
+  player = world.player
+  #create player's weapon
+  bow = Weapon(bow_image, arrow_image)
 
-#damage text class
-class DamageText(pygame.sprite.Sprite):
-  def __init__(self, x, y, damage, color):
-    pygame.sprite.Sprite.__init__(self)
-    self.image = font.render(damage, True, color)
-    self.rect = self.image.get_rect()
-    self.rect.center = (x, y)
-    self.counter = 0
+  #extract enemies from world data
+  enemy_list = world.character_list
 
-  def update(self):
-    #reposition based on screen scroll
-    self.rect.x += screen_scroll[0]
-    self.rect.y += screen_scroll[1]
+  #create sprite groups
+  damage_text_group = pygame.sprite.Group()
+  arrow_group = pygame.sprite.Group()
+  item_group = pygame.sprite.Group()
+  fireball_group = pygame.sprite.Group()
+  splatter_group = pygame.sprite.Group()
 
-    #move damage text up
-    self.rect.y -= 1
-    #delete the counter after a few seconds
-    self.counter += 1
-    if self.counter > 30:
-      self.kill()
+  score_coin = Item(constants.SCREEN_WIDTH - 115, 23, 0, coin_images, True)
+  item_group.add(score_coin)
+  #add the items from the level data
+  for item in world.item_list:
+    item_group.add(item)
 
-#class for handling screen fade
-class ScreenFade():
-  def __init__(self, direction, colour, speed):
-    self.direction = direction
-    self.colour = colour
-    self.speed = speed
-    self.fade_counter = 0
+  #create screen fades
+  intro_fade = ScreenFade(1, constants.BLACK, 4)
+  death_fade = ScreenFade(2, constants.PINK, 4)
 
-  def fade(self):
-    fade_complete = False
-    self.fade_counter += self.speed
-    if self.direction == 1:#whole screen fade
-      pygame.draw.rect(screen, self.colour, (0 - self.fade_counter, 0, constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT))
-      pygame.draw.rect(screen, self.colour, (constants.SCREEN_WIDTH // 2 + self.fade_counter, 0, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
-      pygame.draw.rect(screen, self.colour, (0, 0 - self.fade_counter, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT // 2))
-      pygame.draw.rect(screen, self.colour, (0, constants.SCREEN_HEIGHT // 2 + self.fade_counter, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
-    elif self.direction == 2:#vertical screen fade down
-      pygame.draw.rect(screen, self.colour, (0, 0, constants.SCREEN_WIDTH, 0 + self.fade_counter))
-
-    if self.fade_counter >= constants.SCREEN_WIDTH:
-      fade_complete = True
-
-    return fade_complete
-
-#blood splatter
-class Splatter(pygame.sprite.Sprite):
-  def __init__(self, image, x, y):
-    pygame.sprite.Sprite.__init__(self)
-    self.image = image
-    self.rect = self.image.get_rect()
-    self.rect.center = (x, y)
-    
-  def update(self, screen_scroll):
-    #reposition based on screen scroll
-    self.rect.x += screen_scroll[0]
-    self.rect.y += screen_scroll[1]
-
-#create empty tile list
-world_data = []
-for row in range(constants.ROWS):
-  r = [-1] * constants.COLS
-  world_data.append(r)
-#load in level data and create world
-with open(f"levels/level{level}_data.csv", newline="") as csvfile:
-  reader = csv.reader(csvfile, delimiter = ",")
-  for x, row in enumerate(reader):
-    for y, tile in enumerate(row):
-      world_data[x][y] = int(tile)
-
-world = World()
-world.process_data(world_data, tile_list, item_images, mob_animations)
-
-#create player
-player = world.player
-#create player's weapon
-bow = Weapon(bow_image, arrow_image)
-
-#extract enemies from world data
-enemy_list = world.character_list
-
-#create sprite groups
-damage_text_group = pygame.sprite.Group()
-arrow_group = pygame.sprite.Group()
-item_group = pygame.sprite.Group()
-fireball_group = pygame.sprite.Group()
-splatter_group = pygame.sprite.Group()
-
-score_coin = Item(constants.SCREEN_WIDTH - 115, 23, 0, coin_images, True)
-item_group.add(score_coin)
-#add the items from the level data
-for item in world.item_list:
-  item_group.add(item)
-
-#create screen fades
-intro_fade = ScreenFade(1, constants.BLACK, 4)
-death_fade = ScreenFade(2, constants.PINK, 4)
-
-#create button
-start_button = Button(constants.SCREEN_WIDTH // 2 - 145, constants.SCREEN_HEIGHT // 2 - 150, start_img)
-exit_button = Button(constants.SCREEN_WIDTH // 2 - 110, constants.SCREEN_HEIGHT // 2 + 50, exit_img)
-restart_button = Button(constants.SCREEN_WIDTH // 2 - 175, constants.SCREEN_HEIGHT // 2 - 50, restart_img)
-resume_button = Button(constants.SCREEN_WIDTH // 2 - 175, constants.SCREEN_HEIGHT // 2 - 150, resume_img)
-inventory_resume_button = Button(constants.SCREEN_WIDTH // 2 + 90, constants.SCREEN_HEIGHT // 2 + 200, inventory_resume_button)
+  #create button
+  start_button = Button(constants.SCREEN_WIDTH // 2 - 145, constants.SCREEN_HEIGHT // 2 - 150, start_img)
+  exit_button = Button(constants.SCREEN_WIDTH // 2 - 110, constants.SCREEN_HEIGHT // 2 + 50, exit_img)
+  restart_button = Button(constants.SCREEN_WIDTH // 2 - 175, constants.SCREEN_HEIGHT // 2 - 50, restart_img)
+  resume_button = Button(constants.SCREEN_WIDTH // 2 - 175, constants.SCREEN_HEIGHT // 2 - 150, resume_img)
+  inventory_resume_button = Button(constants.SCREEN_WIDTH // 2 + 90, constants.SCREEN_HEIGHT // 2 + 200, inventory_resume_button)
 
 #main game loop
-async def main(level, start_game, pause_game, inventory_screen, start_intro, screen_scroll, p_d, player, moving_down, moving_left, moving_right, moving_up, world, enemy_list, item_group, score_coin):
   run = True
   while run:
 
     #control frame rate
     clock.tick(constants.FPS)
 
+    #main menu
     if start_game == False:
       screen.fill(constants.MENU_BG)
       if start_button.draw(screen):
@@ -294,17 +304,73 @@ async def main(level, start_game, pause_game, inventory_screen, start_intro, scr
         inventory_screen, pause_game = resume()
       if exit_button.draw(screen):
         run = False
+      events = pygame.event.get()
+      for event in events:
+        if event.type == pygame.QUIT:
+          pygame.quit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                run = False
     else:
+      #pause menu
       if pause_game == True:
         screen.fill(constants.MENU_BG)
         if resume_button.draw(screen):
           inventory_screen, pause_game = resume()
         if exit_button.draw(screen):
           run = False
+        events = pygame.event.get()
+        for event in events:
+          if event.type == pygame.QUIT:
+            pygame.quit()
+          if event.type == pygame.KEYDOWN:
+              if event.key == pygame.K_ESCAPE:
+                  inventory_screen, pause_game = resume()
+                  
+      #inventory screen
       elif inventory_screen == True:
+        items = []
         screen.blit(inventory_screen_fill, (0,0))
+        for x, thing in enumerate(player.inventory):
+          if thing == 2:
+            if x % 3 == 1:
+              item_rect_x = 570
+              item_rect_y = 20 + (90 * (x // 3))
+              item_rect_w = 90
+              item_rect_h = 80
+              item_rect = pygame.Rect(item_rect_x, item_rect_y, item_rect_w, item_rect_h)
+              items.append(item_rect)
+              for item in items:
+                screen.blit(sword_drop_inventory, item_rect)
+            elif x % 3 == 2:
+              item_rect_x = 678
+              item_rect_y = 20 + (90 * (x // 3))
+              item_rect_w = 90
+              item_rect_h = 80
+              item_rect = pygame.Rect(item_rect_x, item_rect_y, item_rect_w, item_rect_h)
+              items.append(item_rect)
+              for item in items:
+                screen.blit(sword_drop_inventory, item_rect)
+            else:
+              item_rect_x = 478
+              item_rect_y = 20 + (90 * (x // 3))
+              item_rect_w = 90
+              item_rect_h = 80
+              item_rect = pygame.Rect(item_rect_x, item_rect_y, item_rect_w, item_rect_h)
+              items.append(item_rect)
+              for item in items:
+                screen.blit(sword_drop_inventory, item_rect)
+                
         if inventory_resume_button.draw(screen):
           inventory_screen, pause_game = resume()
+        
+        events = pygame.event.get()
+        for event in events:
+          if event.type == pygame.QUIT:
+            pygame.quit()
+          if event.type == pygame.KEYDOWN:
+              if event.key == pygame.K_ESCAPE:
+                  inventory_screen, pause_game = resume()
       else:
         screen.fill(constants.BG)
 
@@ -336,7 +402,10 @@ async def main(level, start_game, pause_game, inventory_screen, start_intro, scr
               enemy.update()
             else:
               splatter_image = splatter_gen()
-              splatter = Splatter(splatter_image, enemy.rect.x, enemy.rect.y)
+              if enemy.boss == True:
+                splatter = Splatter(splatter_image, enemy.rect.x + 50, enemy.rect.y + 50)
+              else:
+                splatter = Splatter(splatter_image, enemy.rect.x + 25, enemy.rect.y + 25)
               splatter_group.add(splatter)
               enemy_list, item_group = enemy.enemy_death(enemy_list, item_images, item_group)
               death_fx.play()
@@ -346,7 +415,7 @@ async def main(level, start_game, pause_game, inventory_screen, start_intro, scr
             arrow_group.add(arrow)
             shot_fx.play()
           for arrow in arrow_group:
-            damage, damage_pos = arrow.update(screen_scroll, world.obstacle_tiles, enemy_list)
+            damage, damage_pos = arrow.update(screen_scroll, world.obstacle_tiles, enemy_list, player)
             if damage:
               damage_text = DamageText(damage_pos.centerx, damage_pos.y, str(damage), constants.RED)
               damage_text_group.add(damage_text)
@@ -401,9 +470,13 @@ async def main(level, start_game, pause_game, inventory_screen, start_intro, scr
           world.process_data(world_data, tile_list, item_images, mob_animations)
           temp_hp = player.health
           temp_score = player.score
+          temp_inventory = player.inventory
+          temp_damage_bonus = player.damage_bonus
           player = world.player
           player.health = temp_hp
           player.score = temp_score
+          player.inventory = temp_inventory
+          player.damage_bonus = temp_damage_bonus
           enemy_list = world.character_list
           score_coin = Item(constants.SCREEN_WIDTH - 115, 23, 0, coin_images, True)
           item_group.add(score_coin)
@@ -437,9 +510,13 @@ async def main(level, start_game, pause_game, inventory_screen, start_intro, scr
               world = World()
               world.process_data(world_data, tile_list, item_images, mob_animations)
               temp_score = player.score
+              temp_inventory = player.inventory
+              temp_damage_bonus = player.damage_bonus
               player = world.player
               p_d = True
               player.score = temp_score
+              player.inventory = temp_inventory
+              player.damage_bonus = temp_damage_bonus
               enemy_list = world.character_list
               score_coin = Item(constants.SCREEN_WIDTH - 115, 23, 0, coin_images, True)
               item_group.add(score_coin)
@@ -471,8 +548,7 @@ async def main(level, start_game, pause_game, inventory_screen, start_intro, scr
           inventory_screen = True
         if event.key == pygame.K_p:
           inventory_screen = True
-
-
+          
       #keyboard button released
       if event.type == pygame.KEYUP:
         if event.key == pygame.K_a:
@@ -487,4 +563,4 @@ async def main(level, start_game, pause_game, inventory_screen, start_intro, scr
     pygame.display.update()
     await asyncio.sleep(0)
 
-asyncio.run(main(level, start_game, pause_game, inventory_screen, start_intro, screen_scroll, p_d, player, moving_down, moving_left, moving_right, moving_up, world, enemy_list, item_group, score_coin))
+asyncio.run(main())
